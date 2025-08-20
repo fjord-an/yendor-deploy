@@ -1,0 +1,110 @@
+# COPYRIGHT HEADER TEMPLATES FOR DIFFERENT FILE TYPES
+
+## SHELL SCRIPT HEADER (.sh files)
+#!/bin/bash
+#
+# Copyright (c) 2025 PaceySpace
+# 
+# This file is part of the YendorCats.com website framework.
+# 
+# The technical implementation, architecture, and code contained in this file
+# are the exclusive intellectual property of PaceySpace and
+# may be used as a template for future client projects.
+# 
+# Licensed under the Apache License, Version 2.0.
+# See LICENSE file for full terms and conditions.
+#
+# Client: Yendor Cat Breeding Enterprise
+# Project: YendorCats.com Website
+# Developer: PaceySpace
+#
+
+## PHP HEADER
+<?php
+/**
+ * Copyright (c) 2025 PaceySpace
+ * 
+ * This file is part of the YendorCats.com website framework.
+ * 
+ * The technical implementation, architecture, and code contained in this file
+ * are the exclusive intellectual property of PaceySpace and
+ * may be used as a template for future client projects.
+ * 
+ * Licensed under the Apache License, Version 2.0.
+ * See LICENSE file for full terms and conditions.
+ * 
+ * Client: Yendor Cat Breeding Enterprise
+ * Project: YendorCats.com Website  
+ * Developer: PaceySpace
+ */
+
+## JavaScript/CSS HEADER
+/**
+ * Copyright (c) 2025 PaceySpace
+ * 
+ * This file is part of the YendorCats.com website framework.
+ * 
+ * The technical implementation, architecture, and code contained in this file
+ * are the exclusive intellectual property of PaceySpace and
+ * may be used as a template for future client projects.
+ * 
+ * Licensed under the Apache License, Version 2.0.
+ * See LICENSE file for full terms and conditions.
+ * 
+ * Client: Yendor Cat Breeding Enterprise
+ * Project: YendorCats.com Website
+ * Developer: PaceySpace
+ */
+
+## HTML HEADER
+<!--
+Copyright (c) 2025 PaceySpace
+
+This file is part of the YendorCats.com website framework.
+
+The technical implementation, architecture, and code contained in this file
+are the exclusive intellectual property of PaceySpace and
+may be used as a template for future client projects.
+
+Licensed under the Apache License, Version 2.0.
+See LICENSE file for full terms and conditions.
+
+Client: Yendor Cat Breeding Enterprise
+Project: YendorCats.com Website
+Developer: PaceySpace
+-->
+
+## PYTHON HEADER
+#!/usr/bin/env python3
+"""
+Copyright (c) 2025 PaceySpace
+
+This file is part of the YendorCats.com website framework.
+
+The technical implementation, architecture, and code contained in this file
+are the exclusive intellectual property of PaceySpace and
+may be used as a template for future client projects.
+
+Licensed under the Apache License, Version 2.0.
+See LICENSE file for full terms and conditions.
+
+Client: Yendor Cat Breeding Enterprise
+Project: YendorCats.com Website
+Developer: PaceySpace
+"""
+
+## YAML/DOCKER-COMPOSE HEADER  
+# Copyright (c) 2025 PaceySpace
+#
+# This file is part of the YendorCats.com website framework.
+# 
+# The technical implementation, architecture, and code contained in this file
+# are the exclusive intellectual property of PaceySpace and
+# may be used as a template for future client projects.
+# 
+# Licensed under the Apache License, Version 2.0.
+# See LICENSE file for full terms and conditions.
+#
+# Client: Yendor Cat Breeding Enterprise  
+# Project: YendorCats.com Website
+# Developer: PaceySpace

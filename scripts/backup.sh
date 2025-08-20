@@ -1,4 +1,21 @@
 #!/bin/bash
+#
+# Copyright (c) 2025 PaceySpace
+# 
+# This file is part of the YendorCats.com website framework.
+# 
+# The technical implementation, architecture, and code contained in this file
+# are the exclusive intellectual property of PaceySpace and
+# may be used as a template for future client projects.
+# 
+# Licensed under the Apache License, Version 2.0.
+# See LICENSE file for full terms and conditions.
+#
+# Client: Yendor Cat Breeding Enterprise
+# Project: YendorCats.com Website
+# Developer: PaceySpace
+#
+
 
 # YendorCats Backup Script
 set -e
