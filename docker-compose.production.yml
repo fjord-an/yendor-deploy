@@ -1,0 +1,180 @@
+version: '3.8'
+
+services:
+  # Nginx Reverse Proxy with Security Features
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: yendorcats-nginx-production
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx-logs:/var/log/nginx
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - api
+      - uploader
+    networks:
+      - yendorcats-network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Backend API service
+  api:
+    image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/yendorcats-api:latest
+    container_name: yendorcats-api-production
+    restart: unless-stopped
+    expose:
+      - "80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - AWS__Region=us-west-004
+      - AWS__UseCredentialsFromSecrets=false
+      - AWS__S3__BucketName=${AWS_S3_BUCKET_NAME:-yendor}
+      - AWS__S3__UseDirectS3Urls=true
+      - AWS__S3__ServiceUrl=https://s3.us-west-004.backblazeb2.com
+      - AWS__S3__PublicUrl=https://f004.backblazeb2.com/file/${AWS_S3_BUCKET_NAME:-yendor}/{key}
+      - AWS__S3__UseCdn=true
+      - AWS__S3__AccessKey=${AWS_S3_ACCESS_KEY}
+      - AWS__S3__SecretKey=${AWS_S3_SECRET_KEY}
+      - AWS__S3__KeyPrefix=YendorCats-General-SiteAccess/
+      - B2_APPLICATION_KEY_ID=${B2_APPLICATION_KEY_ID}
+      - B2_APPLICATION_KEY=${B2_APPLICATION_KEY}
+      - B2_BUCKET_ID=${B2_BUCKET_ID}
+      - ConnectionStrings__DefaultConnection=Server=db;Database=YendorCats;User=${MYSQL_USER};Password=${MYSQL_PASSWORD};Port=3306;
+      - JwtSettings__Secret=${YENDOR_JWT_SECRET}
+    volumes:
+      - ./fix-api-startup.sh:/fix-api-startup.sh:ro
+      - api-data:/app/data
+      - api-logs:/app/Logs
+    entrypoint: ["/fix-api-startup.sh"]
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - yendorcats-network
+
+  # MariaDB Database
+  db:
+    image: mariadb:10.11
+    container_name: yendorcats-db-production
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=YendorCats
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    networks:
+      - yendorcats-network
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # File Upload Service
+  uploader:
+    image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/yendorcats-uploader:latest
+    container_name: yendorcats-uploader-production
+    restart: unless-stopped
+    expose:
+      - "80"
+    environment:
+      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-yendor}
+      - AWS_S3_REGION=us-west-004
+      - AWS_S3_ENDPOINT=https://s3.us-west-004.backblazeb2.com
+      - AWS_S3_ACCESS_KEY=${AWS_S3_ACCESS_KEY}
+      - AWS_S3_SECRET_KEY=${AWS_S3_SECRET_KEY}
+      - API_BASE_URL=http://api
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - yendorcats-network
+
+  # Frontend with Nginx
+  frontend:
+    image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/yendorcats-frontend:latest
+    container_name: yendorcats-frontend-production
+    restart: unless-stopped
+    expose:
+      - "80"
+    depends_on:
+      - api
+      - uploader
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - yendorcats-network
+
+  # Log Exporter Service (exports logs to Backblaze B2)
+  log-exporter:
+    image: amazon/aws-cli:latest
+    container_name: yendorcats-log-exporter
+    restart: unless-stopped
+    volumes:
+      - nginx-logs:/logs/nginx:ro
+      - api-logs:/logs/api:ro
+      - ./scripts/export-logs.sh:/export-logs.sh:ro
+    environment:
+      - AWS_ACCESS_KEY_ID=${B2_APPLICATION_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${B2_APPLICATION_KEY}
+      - B2_BUCKET_NAME=${B2_BUCKET_NAME:-yendor}
+    networks:
+      - yendorcats-network
+    entrypoint: ["/bin/sh"]
+    command: |
+      -c 'while true; do
+        echo "Exporting logs to Backblaze B2 at $$(date)..."
+        aws s3 sync /logs/ s3://${B2_BUCKET_NAME}/logs/$$(date +%Y/%m/%d)/ \
+          --endpoint-url https://s3.us-west-004.backblazeb2.com \
+          --exclude "*.pid" \
+          --exclude "*.lock" \
+          --exclude "*.pos" \
+          --only-show-errors
+        echo "Log export completed at $$(date)"
+        sleep 3600
+      done'
+
+networks:
+  yendorcats-network:
+    driver: bridge
+    name: yendorcats-production
+
+volumes:
+  api-data:
+    driver: local
+  api-logs:
+    driver: local
+  mariadb-data:
+    driver: local
+  nginx-logs:
+    driver: local

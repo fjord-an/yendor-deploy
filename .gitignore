@@ -1,0 +1,177 @@
+# ===================================================================
+# COMPREHENSIVE .GITIGNORE FOR PUBLIC DEPLOYMENT REPOSITORY
+# ===================================================================
+# This file prevents ALL sensitive data from being committed to git
+# Safe for PUBLIC repositories - deployment scripts & configs only
+# ===================================================================
+
+# ===================================================================
+# ENVIRONMENT & SECRETS (CRITICAL - NEVER COMMIT THESE!)
+# ===================================================================
+.env
+.env.*
+!.env.example
+!.env.template
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cert
+secrets/
+secrets.*
+config/secrets/
+credentials/
+auth/
+*.secret
+.secrets
+
+# SSL/TLS Certificates and Keys
+ssl/
+*.ssl
+certs/
+certificates/
+
+# AWS Credentials
+.aws/
+aws-credentials*
+*.credentials
+
+# Database dumps and backups with potential sensitive data
+*.sql
+*.dump
+*.backup
+*.tar.gz
+*.zip
+mariadb-backup-*
+database-backup-*
+db-backup-*
+backup-*.sql
+*.db.backup
+
+# ===================================================================
+# LOGS (May contain sensitive information)
+# ===================================================================
+logs/
+*.log
+log/
+*.log.*
+app.log
+error.log
+access.log
+debug.log
+audit.log
+
+# ===================================================================
+# BACKUP FILES (Often contain production data/configs)
+# ===================================================================
+*.backup
+*.backup.*
+*.bak
+*~
+*.orig
+*.old
+*.save
+*.swp
+*.swo
+*.tmp
+*.temp
+
+# Specific backup patterns I see in your directory
+docker-compose.production.yml.backup*
+*.backup2
+*.backup3
+*.fix-backup
+nginx.conf.backup*
+nginx.conf.working
+
+# ===================================================================
+# DATA DIRECTORIES (May contain user data)
+# ===================================================================
+data/
+volumes/
+storage/
+uploads/
+media/
+static/uploads/
+user-data/
+
+# ===================================================================
+# RUNTIME & TEMPORARY FILES
+# ===================================================================
+pid/
+*.pid
+*.sock
+tmp/
+temp/
+.tmp/
+
+# ===================================================================
+# DEVELOPMENT & EDITOR FILES
+# ===================================================================
+.vscode/
+.idea/
+*.sublime-*
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ===================================================================
+# NODE.JS (if applicable)
+# ===================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ===================================================================
+# PYTHON (if applicable)  
+# ===================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+.venv
+
+# ===================================================================
+# DOCKER RUNTIME (but keep Dockerfiles and configs)
+# ===================================================================
+# Keep docker-compose.yml files but exclude runtime data
+.docker/
+docker-data/
+postgres-data/
+mysql-data/
+redis-data/
+
+# ===================================================================
+# MONITORING & ANALYTICS
+# ===================================================================
+.grafana/
+.prometheus/
+monitoring-data/
+
+# ===================================================================
+# CI/CD SECRETS
+# ===================================================================
+.github/secrets/
+.gitlab-ci-secrets/
+ci-secrets/
+
+# ===================================================================
+# WHAT TO KEEP (Examples of safe files):
+# ===================================================================
+# ✅ docker-compose.yml (template versions)
+# ✅ Dockerfile
+# ✅ nginx.conf (sanitized)
+# ✅ deployment scripts (without hardcoded secrets)
+# ✅ README.md
+# ✅ LICENSE
+# ✅ .gitignore
+# ✅ Configuration templates (.env.example)
