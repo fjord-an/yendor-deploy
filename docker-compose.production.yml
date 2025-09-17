@@ -88,6 +88,7 @@ services:
   # MariaDB Database
   db:
     image: mariadb:10.11
+    platform: linux/amd64
     container_name: yendorcats-db-production
     restart: unless-stopped
     environment:
@@ -154,6 +155,7 @@ services:
   # Log Exporter Service (exports logs to Backblaze B2)
   log-exporter:
     image: amazon/aws-cli:latest
+    platform: linux/amd64
     container_name: yendorcats-log-exporter
     restart: unless-stopped
     volumes:
