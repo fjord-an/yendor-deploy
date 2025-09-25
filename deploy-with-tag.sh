@@ -1,5 +1,8 @@
 #!/bin/bash
 
+
+# Set AWS region default
+export AWS_DEFAULT_REGION=ap-southeast-2
 # Deploy script that uses a specific git commit hash or tag for Docker images
 
 # Colors for output
@@ -33,7 +36,7 @@ print_message "Deploying with IMAGE_TAG: $IMAGE_TAG" "$GREEN"
 
 # Pull the new images
 print_message "Pulling images with tag: $IMAGE_TAG" "$YELLOW"
-docker-compose -f docker-compose.production.yml pull
+docker-compose -f docker-compose.production.yml pull --policy always
 
 # Stop and remove old containers
 print_message "Stopping old containers..." "$YELLOW"
