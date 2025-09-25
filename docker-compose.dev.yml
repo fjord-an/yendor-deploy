@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+  # Frontend with Nginx (dev) - serves local frontend with volume mount
+  frontend:
+    image: nginx:alpine
+    container_name: yendorcats-frontend-dev
+    ports:
+      - "8080:80"
+    volumes:
+      - ../frontend:/usr/share/nginx/html:ro
+      - ./frontend/nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    networks:
+      - yendorcats-dev
+
+  # (Optional) Backend API - can be started when needed; builds locally from repo
+  api:
+    build:
+      context: ..
+      dockerfile: backend/YendorCats.API/Dockerfile
+    image: yendorcats/api:dev
+    container_name: yendorcats-api-dev
+    restart: unless-stopped
+    ports:
+      - "5003:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - AWS__Region=us-west-004
+      - AWS__UseCredentialsFromSecrets=false
+      - AWS__S3__BucketName=${AWS_S3_BUCKET_NAME:-yendor}
+      - AWS__S3__UseDirectS3Urls=true
+      - AWS__S3__ServiceUrl=https://s3.us-west-004.backblazeb2.com
+      - AWS__S3__PublicUrl=https://f004.backblazeb2.com/file/${AWS_S3_BUCKET_NAME:-yendor}/{key}
+      - AWS__S3__UseCdn=false
+      - AWS__S3__AccessKey=${AWS_S3_ACCESS_KEY}
+      - AWS__S3__SecretKey=${AWS_S3_SECRET_KEY}
+      - AWS__S3__KeyPrefix=YendorCats-General-SiteAccess/
+      - B2_APPLICATION_KEY_ID=${B2_APPLICATION_KEY_ID}
+      - B2_APPLICATION_KEY=${B2_APPLICATION_KEY}
+      - B2_BUCKET_ID=${B2_BUCKET_ID}
+      - ConnectionStrings__DefaultConnection=Server=db;Database=YendorCats;User=${MYSQL_USER};Password=${MYSQL_PASSWORD};Port=3306;
+      - JwtSettings__Secret=${YENDOR_JWT_SECRET}
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - yendorcats-dev
+
+  # (Optional) File Upload Service - local build when needed
+  uploader:
+    build:
+      context: ../tools/file-uploader
+      dockerfile: Dockerfile
+    image: yendorcats/uploader:dev
+    container_name: yendorcats-uploader-dev
+    restart: unless-stopped
+    ports:
+      - "5002:80"
+    environment:
+      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-yendor}
+      - AWS_S3_REGION=us-west-004
+      - AWS_S3_ENDPOINT=https://s3.us-west-004.backblazeb2.com
+      - AWS_S3_ACCESS_KEY=${AWS_S3_ACCESS_KEY}
+      - AWS_S3_SECRET_KEY=${AWS_S3_SECRET_KEY}
+      - API_BASE_URL=http://api
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - yendorcats-dev
+
+  # (Optional) MariaDB Database - used by API
+  db:
+    image: mariadb:10.11
+    container_name: yendorcats-db-dev
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
+      - MYSQL_USER=${MYSQL_USER:-yendor}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-yendor}
+      - MYSQL_DATABASE=YendorCats
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - yendorcats-dev
+
+networks:
+  yendorcats-dev:
+    driver: bridge
+
+volumes:
+  mariadb-data:
+    driver: local
+
