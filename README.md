@@ -1,16 +1,38 @@
 # YendorCats.com - Website Deployment Framework
 
-This repository contains the deployment infrastructure, Docker configurations, and technical framework for the YendorCats.com cat breeding website.
+This repository contains the deployment infrastructure, Docker configurations, and comprehensive CI/CD automation for the YendorCats.com cat breeding website.
 
 ## 🚀 **Quick Start**
 
 ### Prerequisites
 - Docker and Docker Compose installed
-- SSL certificates configured separately  
+- AWS CLI configured with ECR access
+- SSL certificates configured separately
 - Environment variables prepared
 - Database access configured
 
-### Deployment Steps
+### New CI/CD Deployment (Recommended)
+1. **Verify AWS Setup**
+   ```bash
+   ./scripts/aws/verify-aws-setup.sh
+   ```
+
+2. **Build and Push to ECR**
+   ```bash
+   ./scripts/deploy/build-and-push.sh
+   ```
+
+3. **Deploy to Staging**
+   ```bash
+   ./scripts/deploy/deploy-staging.sh
+   ```
+
+4. **Deploy to Production**
+   ```bash
+   ./scripts/deploy/deploy-production.sh
+   ```
+
+### Legacy Deployment Steps
 1. **Clone Repository**
    ```bash
    git clone <repository-url>
@@ -28,6 +50,42 @@ This repository contains the deployment infrastructure, Docker configurations, a
    chmod +x scripts/deploy.sh
    ./scripts/deploy.sh
    ```
+
+---
+
+## 🔄 **CI/CD Automation**
+
+### New Comprehensive CI/CD System
+This repository now includes a complete CI/CD automation system with:
+
+#### AWS ECR Integration
+- **Automated ECR Login**: `./scripts/aws/ecr-login.sh`
+- **Setup Verification**: `./scripts/aws/verify-aws-setup.sh`
+- **Repository Management**: Auto-creation of ECR repositories
+
+#### Deployment Automation
+- **Build & Push**: `./scripts/deploy/build-and-push.sh`
+- **Staging Deployment**: `./scripts/deploy/deploy-staging.sh`
+- **Production Deployment**: `./scripts/deploy/deploy-production.sh` (with safety checks)
+
+#### Server Management
+- **Server Setup**: `./scripts/server/setup-server.sh`
+- **Remote Deployment**: `./scripts/server/pull-and-deploy.sh`
+
+#### Maintenance Tools
+- **Image Cleanup**: `./scripts/utils/cleanup-images.sh`
+- **Health Monitoring**: Built-in health checks
+- **Backup System**: Automated backups before production deployments
+
+### Configuration
+- **AWS Account**: 025066273203
+- **Region**: ap-southeast-2 (Australia)
+- **ECR Registry**: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com
+
+### Documentation
+- **Complete Guide**: `./scripts/README.md`
+- **AWS Setup**: `./scripts/AWS_CLI_SETUP_GUIDE.md`
+- **Troubleshooting**: Comprehensive error handling in all scripts
 
 ---
 
